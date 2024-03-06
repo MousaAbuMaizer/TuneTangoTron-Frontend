@@ -67,7 +67,7 @@ const LoginPage = () => {
               <label className="flex items-center gap-2">
                 <input type="checkbox" className="form-checkbox " /> Remember Me
               </label>
-              <a href="#" className="text-white hover:text-secondary">Forgot Password?</a>
+              <Link href="#" className="text-white hover:text-secondary">Forgot Password?</Link>
             </div>
             <Link href='/main'>
               <button

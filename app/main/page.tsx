@@ -1,6 +1,10 @@
 'use client';
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+
+import { squircle } from 'ldrs'
+squircle.register()
 
 export default function Main() {
     const [inputValue, setInputValue] = useState('');
@@ -52,9 +56,9 @@ export default function Main() {
                 </div>
             </div>
             {/* Main Content */}
-            <div className={`flex flex-row ${showPreview ? 'space-x-4' : ''} pt-24 justify-center`}>
+            <div className={`flex ${showPreview ? 'flex-row' : 'flex-col'} pt-24 justify-center items-stretch gap-10`}>
                 {/* Form */}
-                <div className="bg-white/10 p-6 rounded-lg shadow-xl max-w-md w-full">
+                <div className="bg-white/10 p-6 rounded-lg shadow-xl w-96"> {/* Set width to 96 (24rem) */}
                     <h2 className="text-white text-2xl font-bold mb-6 text-center">Choose Your Options</h2>
                     <div className="mb-4">
                         <label htmlFor="username" className="block text-gray-400 mb-2">Topic</label>
@@ -105,22 +109,29 @@ export default function Main() {
                     </div>
                 </div>
                 {showPreview && (
-                    <div className="bg-white/10 p-6 rounded-lg shadow-xl max-w-md w-full transition-all duration-300">
-                        <h2 className="text-white text-2xl font-bold mb-6 text-center">Preview</h2>
-                        {loading ? (
-                            <div className="flex justify-center items-center h-full">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-                            </div>
-                        ) : (
-                            <div className="overflow-auto h-64">
-                                <pre className="text-sm font-mono text-white">
-                                    {previewData}
-                                </pre>
-                            </div>
-                        )}
-                    </div>
-                )}
+                <div className="bg-white/10 p-6 rounded-lg shadow-xl w-96">
+                    <h2 className="text-white text-2xl font-bold mb-6 text-center">Preview</h2>
+                    {loading ? (
+                        <div className="flex justify-center items-center h-full">
+                            <l-squircle
+                                size="37"
+                                stroke="5"
+                                stroke-length="0.15"
+                                bg-opacity="0.1"
+                                speed="0.9" 
+                                color="white" 
+                            ></l-squircle>
+                        </div>
+                    ) : (
+                        <div className="overflow-auto h-64">
+                            <pre className="text-sm font-mono text-white">
+                                {previewData}
+                            </pre>
+                        </div>
+                    )}
+                </div>
+            )}
             </div>
         </div>
     );    
-}
+}    
