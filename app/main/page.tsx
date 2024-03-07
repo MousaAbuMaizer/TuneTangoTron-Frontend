@@ -3,7 +3,9 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { useRouter } from 'next/navigation'
 import { squircle } from 'ldrs'
+
 squircle.register()
 
 export default function Main() {
@@ -14,34 +16,67 @@ export default function Main() {
     const [previewData, setPreviewData] = useState('');
     const [showPreview, setShowPreview] = useState(false);
 
+    const router = useRouter()
+
+
     const handlePreview = async () => {
         setLoading(true);
-        setShowPreview(true); // Show the preview area immediately
+        setShowPreview(true); 
     
         try {
-          // Simulate an API call
-          const response = await fetch('/api/preview', {
-            method: 'POST',
-            body: JSON.stringify({ inputValue, selectValue, rangeValue }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
+            const response = await fetch('/api/preview', {
+                method: 'POST',
+                body: JSON.stringify({ inputValue, selectValue }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
     
-          if (response.ok) {
-            const data = await response.json();
-            setPreviewData(data);
-          } else {
-            throw new Error('Preview failed');
-          }
+            if (response.ok) {
+                const data = await response.json();
+                setPreviewData(data);
+            } else {
+                throw new Error('Preview failed');
+            }
         } catch (error) {
-          console.error('There was an issue fetching the preview:', error);
+            console.error('There was an issue fetching the preview:', error);
         }
     
         setLoading(false);
-      };
+    };
+
+    const handleGenerate = async () => {
+        // Navigate to the loading page first
+        router.push('/loading');
     
-      return (
+        try {
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                body: JSON.stringify({ inputValue, selectValue, rangeValue }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            if (!response.ok) {
+                throw new Error('Generate request failed');
+            }
+    
+            // Handle the response if needed
+            const data = await response.json();
+    
+            // Convert the data object to a query string
+            const queryString = new URLSearchParams({ data: JSON.stringify(data) }).toString();
+    
+            // Navigate to the /output page after receiving the response
+            router.push(`/output?${queryString}`);
+        } catch (error) {
+            console.error('There was an issue with the generate request:', error);
+            // Handle error
+        }
+    };    
+    
+    return (
         <div className="relative h-screen overflow-hidden bg-primary flex justify-center items-center">
             {/* Header */}
             <div className="absolute top-0 left-0 right-0 bg-white py-4 px-6">
@@ -80,9 +115,8 @@ export default function Main() {
                             className="w-full px-4 py-2 border border-transparent rounded-md bg-primary text-white focus:outline-none focus:ring-2 focus:ring-secondary"
                         >
                             <option value="">Select An Option</option>
-                            <option value="option1">Option 1</option>
-                            <option value="option2">Option 2</option>
-                            <option value="option3">Option 3</option>
+                            <option value="langchain">Default (LangChain Format)</option>
+                            <option value="gpt">OpenAI GPT</option>
                         </select>
                     </div>
                     <div className="mb-6">
@@ -90,22 +124,24 @@ export default function Main() {
                         <input
                             id="slider"
                             type="range"
-                            min="100"
-                            max="1000"
-                            step="100"
+                            min="5"
+                            max="50"
+                            step="5"
                             value={rangeValue}
                             onChange={(e) => setRangeValue(Number(e.target.value))}
                             className="w-full h-2 rounded-md cursor-pointer focus:outline-none"
                         />
                         <div className="text-white text-center mt-2">{rangeValue}</div>
                     </div>
-                    <div className="flex gap-4 mb-4">
-                        <button className="w-1/2 py-2 bg-secondary text-white rounded-md focus:outline-none hover:bg-accent">
-                            Generate
+                    <div className="gap-4  mb-4 ">
+                    {/* <Link href="/loading" onClick={handleGenerate}> */}
+                        <button onClick={handleGenerate} className="w-1/2 py-2 bg-secondary text-white rounded-md focus:outline-none hover:bg-accent">
+                        Generate
                         </button>
-                        <button onClick={handlePreview} className="w-1/2 py-2 bg-secondary text-white rounded-md focus:outline-none hover:bg-accent">
-                            Preview
-                        </button>
+                    {/* </Link> */}
+                    <button onClick={handlePreview} className="w-2/4 py-2 bg-secondary text-white rounded-md focus:outline-none hover:bg-accent">
+                        Preview
+                    </button>
                     </div>
                 </div>
                 {showPreview && (
