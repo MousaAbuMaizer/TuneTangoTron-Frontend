@@ -1,35 +1,45 @@
 'use client'
 import React, { useState } from 'react';
 import { FaUser, FaKey } from 'react-icons/fa';
-import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
-const LoginPage = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+const LoginPage: React.FC = () => {
+  const router = useRouter();
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.preventDefault();
-    console.log('Login with:', username, password);
+
+    try {
+      const response = await fetch('http://localhost:8000/api/v1/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const loginSuccess = await response.json();
+
+      if (response.ok && loginSuccess.success) {
+        router.push('/main');
+      } else {
+        toast.error('Invalid username or password');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
+    }
   };
 
   return (
-    <div className="relative h-screen overflow-hidden bg-primary">
-      <div className="bg-white py-4 px-6">
-        <div className="max-w-screen-xl mx-auto flex items-center">
-          <Image
-            src="/PricewaterhouseCoopers_Logo.png"
-            alt="PwC Logo"
-            width={100}
-            height={50} 
-            className="mr-4"
-          />
-        </div>
-      </div>
       <div className="absolute inset-0 flex items-center justify-center pointer-events-auto">
         <div className="backdrop-blur-lg rounded-lg shadow-lg p-7 max-w-sm w-full m-4 pointer-events-auto bg-white/10">
-          <h2 className="text-center text-2xl font-bold text-white mb-2">Log In</h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <h2 className="text-center text-2xl font-bold text-white mb-2">Log In</h2>
+          <form className="space-y-6">
             <div className="space-y-4">
               <label htmlFor="username" className="block text-sm font-medium text-white">
                 Username
@@ -46,7 +56,6 @@ const LoginPage = () => {
                   />
                 </div>
               </label>
-
               <label htmlFor="password" className="block text-sm font-medium text-white">
                 Password
                 <div className="mt-1 relative rounded-md shadow-sm">
@@ -65,23 +74,21 @@ const LoginPage = () => {
             </div>
             <div className="flex justify-between text-sm text-white">
               <label className="flex items-center gap-2">
-                <input type="checkbox" className="form-checkbox " /> Remember Me
+                <input type="checkbox" className="form-checkbox" /> Remember Me
               </label>
               <Link href="#" className="text-white hover:text-secondary">Forgot Password?</Link>
             </div>
-            <Link href='/main'>
-              <button
-                type="submit"
-                className="py-2 w-full mt-4 font-medium shadow-lg rounded-lg bg-secondary text-white hover:bg-accent"
-              >
-                Continue
-              </button>
-            </Link>
+            <button
+              type="submit"
+              className="py-2 w-full mt-4 font-medium shadow-lg rounded-lg bg-secondary text-white hover:bg-accent"
+                onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => handleSubmit(event)}
+            >
+              Continue
+            </button>
           </form>
         </div>
       </div>
-    </div>
   );
-};
+}  
 
 export default LoginPage;

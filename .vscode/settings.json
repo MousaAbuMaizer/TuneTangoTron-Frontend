@@ -4,7 +4,9 @@
         "langchain",
         "ldrs",
         "Pricewaterhouse",
+        "SDLC",
         "squircle",
-        "tailwindcss"
+        "tailwindcss",
+        "toastify"
     ]
 }
