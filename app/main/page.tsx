@@ -2,18 +2,25 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'
 import { squircle } from 'ldrs'
-import Image from 'next/image';
 import useStore from '../../store/store';
+import InputField from '../../components/InputField';
 
 export default function Main() {
-    const [inputValue, setInputValue] = useState('');
-    const [selectValue, setSelectValue] = useState('');
-    const [rangeValue, setRangeValue] = useState(25);
-    const [loading, setLoading] = useState(false);
-    const [previewData, setPreviewData] = useState('');
-    const [showPreview, setShowPreview] = useState(false);
-    const setDownloadLink = useStore((state) => state.setDownloadLink);
-    const router = useRouter()
+    const [inputValue, setInputValue] = useState<string>('');
+    const [selectValue, setSelectValue] = useState<string>('');
+    const [rangeValue, setRangeValue] = useState<number>(25);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [previewData, setPreviewData] = useState<any>(''); 
+    const [showPreview, setShowPreview] = useState<boolean>(false);
+    const setDownloadLink = useStore((state: any) => state.setDownloadLink); 
+    const [selectedOption, setSelectedOption] = useState<string>("langchain");
+    const router = useRouter();
+    
+    const options = [
+        { value: "langchain", label: "Default (LangChain Format)" },
+        { value: "gpt", label: "OpenAI GPT" },
+    ];
+    const widthPercentage = 100 / options.length;
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -21,14 +28,14 @@ export default function Main() {
                 squircle.register();
             });
         }
-    }, []);
+        }, []);
+    
 
     const handlePreview = async () => {
-        setLoading(true);
-        setShowPreview(true); 
+        setLoading(true); 
     
         try {
-            const response = await fetch('http://localhost:8000/api/v2/generate_example_prompts', {
+            const response = await fetch('http://localhost:8000/api/v3/generate_example_data_v2', {
                 method: 'POST',
                 body: JSON.stringify({ topic: inputValue }), // Only send the topic as input
                 headers: {
@@ -47,126 +54,124 @@ export default function Main() {
         }
     
         setLoading(false);
-    };    
+    };        
 
     const handleGenerate = async () => {
-    // Navigate to the loading page first
-    router.push('/loading');
+        router.push('/loading');
 
-    try {
-        const response = await fetch('http://localhost:8000/api/v2/generate_data', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ topic: inputValue, number_records: rangeValue }),
-        });
+        try {
+            const response = await fetch('http://localhost:8000/api/v2/generate_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ topic: inputValue, number_records: rangeValue }),
+            });
 
-        if (!response.ok) {
-            throw new Error('Generate request failed');
+            if (!response.ok) {
+                throw new Error('Generate request failed');
+            }
+
+            const result = await response.json();
+            const downloadLink = result.url;
+            setDownloadLink(downloadLink);
+            router.push(`/output`);
+        } catch (error) {
+            console.error('There was an issue with the generate request:', error);
         }
+    };
 
-        // Handle the response
-        const result = await response.json();
-        const downloadLink = result.url; // Make sure to match the key with the response
-        setDownloadLink(downloadLink)
-        // Navigate to the output page with the link as a URL parameter
-        router.push(`/output`);
-    } catch (error) {
-        console.error('There was an issue with the generate request:', error);
-    }
-}; 
-
-    return (
-        <div className="relative h-screen overflow-hidden bg-primary flex justify-center items-center">
-            <div className="absolute top-0 left-0 right-0 bg-white py-4 px-40">
-                <div className="max-w-screen-xxl mx-auto flex items-center">
-                <Image
-                    src="/PricewaterhouseCoopers_Logo.png"
-                    alt="PwC Logo"
-                    width={75}
-                    height={25} 
-                    className="mr-3"
+    return (            
+        <div className="flex flex-row min-h-screen">
+            <div className="flex flex-col w-1/2 h-screen overflow-auto p-6">
+                <h2 className="text-white text-2xl font-bold mb-6 text-center">Choose Your Options</h2>
+                <InputField
+                    id="topic"
+                    label="Topic"
+                    value={inputValue}
+                    placeholder="Historical Event..."
+                    onChange={(e) => setInputValue(e.target.value)}
                 />
-                <div className="border-l-2 border-black h-8 mx-5"></div>
-                <span className="text-2xl text-black font-medium">SDLC</span>
+                <InputField
+                    id="instructions"
+                    label="Instructions"
+                    value={inputValue}
+                    placeholder="..."
+                    onChange={(e) => setInputValue(e.target.value)}
+                />
+                <InputField
+                    id="prefix"
+                    label="Prefix"
+                    value={inputValue}
+                    placeholder="..."
+                    onChange={(e) => setInputValue(e.target.value)}
+                />
+                <div className="mb-4">
+                    <label htmlFor="select" className="block text-gray-400 mb-2">Format</label>
+                    <div className="flex justify-center items-center mb-4">
+                        <div className="relative bg-gray-800 rounded-lg p-1 inline-flex">
+                        <div
+                            className={`absolute bg-gray-700 rounded-lg transition-transform duration-300 ease-in-out ${
+                            selectedOption === "create" ? "translate-x-0" : "translate-x-full"
+                            }`}
+                            style={{ width: '50%', height: '100%' }}
+                        ></div>
+                        {["create", "configure"].map((option) => (
+                            <button
+                            key={option}
+                            onClick={() => setSelectedOption(option)}
+                            className={`px-6 py-2 text-sm font-medium uppercase text-white focus:outline-none ${
+                                selectedOption === option ? "" : "opacity-50"
+                            }`}
+                            style={{ transition: 'opacity 0.3s' }}
+                            >
+                            {option.charAt(0).toUpperCase() + option.slice(1)}
+                            </button>
+                        ))}
+                        </div>
+                    </div>
                 </div>
-            </div>
-            {/* Main Content */}
-            <div className={`flex ${showPreview ? 'flex-row' : 'flex-col'} pt-24 justify-center items-stretch gap-10`}>
-                {/* Form */}
-                <div className="bg-white/10 p-6 rounded-lg shadow-xl w-96"> {/* Set width to 96 (24rem) */}
-                    <h2 className="text-white text-2xl font-bold mb-6 text-center">Choose Your Options</h2>
-                    <div className="mb-4">
-                        <label htmlFor="username" className="block text-gray-400 mb-2">Topic</label>
-                        <input
-                            type="text"
-                            id="username"
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            placeholder="Historical Event..."
-                            className="w-full px-4 py-2 border border-transparent rounded-md bg-primary text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-secondary"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="select" className="block text-gray-400 mb-2">Format</label>
-                        <select
-                            id="select"
-                            value={selectValue}
-                            onChange={(e) => setSelectValue(e.target.value)}
-                            className="w-full px-4 py-2 border border-transparent rounded-md bg-primary text-white focus:outline-none focus:ring-2 focus:ring-secondary"
-                        >
-                            <option value="">Select An Option</option>
-                            <option value="langchain">Default (LangChain Format)</option>
-                            <option value="gpt">OpenAI GPT</option>
-                        </select>
-                    </div>
-                    <div className="mb-6">
-                        <label htmlFor="slider" className="block text-gray-400 mb-2">Number Of Records</label>
-                        <input
-                            id="slider"
-                            type="range"
-                            min="5"
-                            max="25"
-                            step="1"
-                            value={rangeValue}
-                            onChange={(e) => setRangeValue(Number(e.target.value))}
-                            className="w-full h-2 rounded-md cursor-pointer focus:outline-none"
-                        />
-                        <div className="text-white text-center mt-2">{rangeValue}</div>
-                    </div>
-                    <div className="flex  gap-4  mb-4 ">
-                    {/* <Link href="/loading" onClick={handleGenerate}> */}
-                        <button onClick={handleGenerate} className="w-1/2 py-2 bg-secondary text-white rounded-md focus:outline-none hover:bg-accent">
+                <InputField
+                    id="examples"
+                    label="Examples"
+                    value={inputValue}
+                    placeholder="..."
+                    onChange={(e) => setInputValue(e.target.value)}
+                />
+                <div className="mb-6">
+                    <label htmlFor="slider" className="block text-gray-400 mb-2">Number Of Records</label>
+                    <input
+                        id="slider"
+                        type="range"
+                        min="5"
+                        max="25"
+                        step="1"
+                        value={rangeValue}
+                        onChange={(e) => setRangeValue(Number(e.target.value))}
+                        className="w-full h-2 rounded-md cursor-pointer focus:outline-none"
+                    />
+                    <div className="text-white text-center mt-2">{rangeValue}</div>
+                </div>
+                <div className="flex gap-4 mt-4 mb-4">
+                    <button onClick={handleGenerate} className="w-1/2 py-2 bg-secondary text-white rounded-md focus:outline-none hover:bg-accent">
                         Generate
-                        </button>
-                    {/* </Link> */}
-                    <button onClick={handlePreview} className="w-2/4 py-2 bg-secondary text-white rounded-md focus:outline-none hover:bg-accent">
+                    </button>
+                    <button onClick={handlePreview} className="w-1/2 py-2 bg-secondary text-white rounded-md focus:outline-none hover:bg-accent">
                         Preview
                     </button>
-                    </div>
                 </div>
-                {showPreview && (
-                    <div className="bg-white/10 p-6 rounded-lg shadow-xl w-full max-w-2xl"> {/* Adjust width to be responsive */}
-                        <h2 className="text-white text-2xl font-bold mb-6 text-center">Preview</h2>
-                        {loading ? (
-                            <div className="flex justify-center items-center h-full">
-                                <l-squircle
-                                    size="37"
-                                    stroke="5"
-                                    stroke-length="0.15"
-                                    bg-opacity="0.1"
-                                    speed="0.9" 
-                                    color="white" 
-                                ></l-squircle>
-                            </div>
-                        ) : (
-                            <div className="overflow-auto h-65"> {/* Ensuring the content is scrollable */}
-                                <pre className="text-sm font-mono text-white">
-                                    {JSON.stringify(previewData, null, 2)}
-                                </pre>
-                            </div>
-                        )}
+            </div>
+            <div className="w-1/2 p-6 bg-white/10 rounded-lg shadow-xl overflow-auto">
+            <h2 className="text-white text-2xl font-bold mb-6 text-center">Preview</h2>
+                {loading ? (
+                    <div className="flex justify-center items-center h-full">
+                        <l-squircle size="37" stroke="5" stroke-length="0.15" bg-opacity="0.1" speed="0.9" color="white"></l-squircle>
+                    </div>
+                ) : (
+                    <div className="overflow-auto">
+                        <pre className="text-sm font-mono text-white">
+                            {JSON.stringify(previewData, null, 2)}
+                        </pre>
                     </div>
                 )}
             </div>

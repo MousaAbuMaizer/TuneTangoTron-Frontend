@@ -5,6 +5,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import './globals.css';
 import Image from 'next/image';
 import React from 'react'; 
+import { TbCodeDots } from "react-icons/tb";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +23,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="relative h-screen overflow-hidden bg-primary"> 
+        <div className="flex flex-col h-screen overflow-hidden bg-primary">
           <ToastContainer
             position="top-right"
             autoClose={2000}
@@ -34,7 +36,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
             pauseOnHover
             theme="dark"
           />
-          <div className="absolute top-0 left-0 right-0 bg-white py-4 px-40">
+          <header className="bg-white py-4 px-40">
             <div className="max-w-screen-xxl mx-auto flex items-center">
               <Image
                 src="/PricewaterhouseCoopers_Logo.png"
@@ -44,10 +46,12 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
                 className="mr-3"
               />
               <div className="border-l-2 border-primary h-8 mx-5"></div>
-              <span className="text-2xl text-primary font-medium">SDLC</span>
+              <span className="text-2xl text-primary font-medium"><TbCodeDots fontSize={"2.2rem"}/></span>
             </div>
-          </div>
-          {children}
+          </header>
+          <main className="flex-grow overflow-auto">
+            {children}
+          </main>
         </div>
       </body>
     </html>

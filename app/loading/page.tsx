@@ -11,12 +11,12 @@ const Loading: FC = () => {
             <h2 className="text-white text-2xl font-bold mb-6 text-center">Generating The Data</h2>
             <div className="flex justify-center items-center">
                 <l-squircle
-            size="37"
-            stroke="5"
-            stroke-length="0.15"
-            bg-opacity="0.1"
-            speed="0.9"
-            color="white">
+                    size="37"
+                    stroke="5"
+                    stroke-length="0.15"
+                    bg-opacity="0.1"
+                    speed="0.9"
+                    color="white">
                 </l-squircle>
             </div>
             </div>
