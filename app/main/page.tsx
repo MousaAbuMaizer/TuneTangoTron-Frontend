@@ -35,9 +35,9 @@ export default function Main() {
         setLoading(true); 
     
         try {
-            const response = await fetch('http://localhost:8000/api/v3/generate_example_data_v2', {
+            const response = await fetch('http://localhost:8000/api/v2/generate_data', {
                 method: 'POST',
-                body: JSON.stringify({ topic: inputValue }), // Only send the topic as input
+                body: JSON.stringify({ topic: inputValue }), 
                 headers: {
                     'Content-Type': 'application/json',
                 },
