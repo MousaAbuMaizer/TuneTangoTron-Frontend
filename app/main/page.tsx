@@ -157,12 +157,9 @@ export default function Main() {
                             <option value="custom">Custom Format (JSON)</option>
                         </select>
                         {formatChoice === 'custom' && (
-                            <textarea
-                                className="bg-gray-800 text-white rounded-lg p-2 w-full"
-                                value={customFormat}
-                                onChange={(e) => setCustomFormat(e.target.value)}
-                                placeholder='{"your": "json here"}'
-                            ></textarea>
+                            <p className="text-red-500 text-sm italic mt-2">
+                                important: Ensure your custom schema matches the provided example above.
+                            </p>
                         )}
                     </div>
                 </div>
