@@ -40,7 +40,7 @@ export default function Main() {
         };
     
         try {
-            const response = await fetch('http://localhost:8000/api/v2/generate_data', {
+            const response = await fetch('http://localhost:8000/api/v2/priview_data', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
